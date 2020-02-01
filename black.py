@@ -1910,6 +1910,12 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
     t = leaf.type
     p = leaf.parent
     v = leaf.value
+    if t == token.RPAR and p and p.type in {
+        syms.trailer,
+        syms.classdef,
+    }:
+        return SPACE
+
     if t in ALWAYS_NO_SPACE:
         return NO
 
@@ -1927,6 +1933,11 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
     prev = leaf.prev_sibling
     if not prev:
         prevp = preceding_leaf(p)
+
+        if prevp.parent.type in {
+            syms.trailer,
+        } and prevp.type == token.LPAR:
+            return SPACE
 
         if not prevp or prevp.type in OPENING_BRACKETS:
             return NO
@@ -1982,9 +1993,6 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
             # Python 2 print chevron
             return NO
 
-    elif prev.type in OPENING_BRACKETS:
-        return NO
-
     if p.type in {syms.parameters, syms.arglist}:
         # untyped function signatures or calls
         if not prev or prev.type != token.COMMA:
@@ -2021,7 +2029,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
     elif p.type == syms.trailer:
         # attributes and calls
-        if t == token.LPAR or t == token.RPAR:
+        if t == token.LPAR:
             return NO
 
         if not prev:
@@ -2032,6 +2040,9 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
             elif t == token.LSQB:
                 return NO
+
+        elif prev.type == token.LPAR:
+            return SPACE
 
         elif prev.type != token.COMMA:
             return NO
@@ -2066,7 +2077,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
             return NO
 
         if prev and prev.type == token.LPAR:
-            return NO
+            return SPACE
 
     elif p.type in {syms.subscript, syms.sliceop}:
         # indexing
