@@ -1913,7 +1913,8 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
     if t == token.RPAR and p and p.type in {
         syms.trailer,
         syms.classdef,
-    }:
+        syms.parameters,
+    } and leaf.prev_sibling and leaf.prev_sibling.type != token.LPAR:
         return SPACE
 
     if t in ALWAYS_NO_SPACE:
@@ -1936,6 +1937,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
         if prevp.parent.type in {
             syms.trailer,
+            syms.parameters,
         } and prevp.type == token.LPAR:
             return SPACE
 
@@ -1995,6 +1997,9 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
     if p.type in {syms.parameters, syms.arglist}:
         # untyped function signatures or calls
+        if prev and prev.type == token.LPAR:
+            return SPACE
+
         if not prev or prev.type != token.COMMA:
             return NO
 
@@ -2019,6 +2024,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
         elif prev.type != token.COMMA:
             return NO
+
 
     elif p.type == syms.tname:
         # type names
@@ -2094,6 +2100,9 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
     elif p.type == syms.atom:
         if prev and t == token.DOT:
             # dots, but not the first one.
+            return NO
+
+        elif prev and prev.type == token.LPAR:
             return NO
 
     elif p.type == syms.dictsetmaker:
