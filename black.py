@@ -2613,6 +2613,9 @@ def right_hand_split(
 
     ensure_visible(opening_bracket)
     ensure_visible(closing_bracket)
+    if tail.leaves and tail.leaves[0].type == token.RPAR and tail.leaves[0].prefix == ' ':
+        tail.leaves[0].prefix = ''
+
     for result in (head, body, tail):
         if result:
             yield result
