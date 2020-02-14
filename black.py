@@ -1938,7 +1938,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
         if prevp.parent.type in {
             syms.trailer,
             syms.parameters,
-        } and prevp.type == token.LPAR:
+        } and prevp.type == token.LPAR and prevp.value == '(':
             return SPACE
 
         if not prevp or prevp.type in OPENING_BRACKETS:
@@ -1997,7 +1997,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
     if p.type in {syms.parameters, syms.arglist}:
         # untyped function signatures or calls
-        if prev and prev.type == token.LPAR:
+        if prev and prev.type == token.LPAR and prev.value == '(':
             return SPACE
 
         if not prev or prev.type != token.COMMA:
@@ -2047,7 +2047,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
             elif t == token.LSQB:
                 return NO
 
-        elif prev.type == token.LPAR:
+        elif prev.type == token.LPAR and prev.value == '(':
             return SPACE
 
         elif prev.type != token.COMMA:
@@ -2082,7 +2082,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
         if t == token.LPAR:
             return NO
 
-        if prev and prev.type == token.LPAR:
+        if prev and prev.type == token.LPAR and prev.value == '(':
             return SPACE
 
     elif p.type in {syms.subscript, syms.sliceop}:
@@ -2142,6 +2142,10 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
 
             if prev and prev.type == token.DOT:
                 return NO
+
+            if prev and prev.type == token.LPAR and not prev.value:
+                return NO
+
 
     elif p.type == syms.sliceop:
         return NO
