@@ -1938,6 +1938,7 @@ def whitespace(leaf: Leaf, *, complex_subscript: bool) -> str:  # noqa: C901
         if prevp.parent.type in {
             syms.trailer,
             syms.parameters,
+            syms.classdef,
         } and prevp.type == token.LPAR and prevp.value == '(':
             return SPACE
 
